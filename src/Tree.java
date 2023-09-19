@@ -1,6 +1,8 @@
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * A recursive tree data structure, which provides services required of the
@@ -69,5 +71,79 @@ public class Tree<T> {
         }
     }
 
-    public
+    public boolean contains(T value) {
+        if (value == root) {
+            return true;
+        }
+
+        for (Tree<T> subtree : subtrees) {
+            if (subtree.contains(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<Tree<T>> getLeaves() {
+        if (isEmpty()) {
+            return List.of();
+        } else if (subtrees.isEmpty()) {
+            return List.of(this);
+        } else {
+            List<Tree<T>> result = new ArrayList<>();
+
+            for (Tree<T> subtree : subtrees) {
+                result.addAll(subtree.getLeaves());
+            }
+            return result;
+        }
+    }
+
+
+    private void deleteRoot() {
+        if (subtrees.isEmpty()) {
+            root = null;
+        } else {
+            Tree<T> subtree = subtrees.remove(0);
+
+            root = subtree.root;
+            subtrees.addAll(subtree.subtrees);
+        }
+    }
+
+    public boolean deleteItem(T value) {
+        if (isEmpty()) {
+            return false;
+        } else if (root == value) {
+            deleteRoot();
+            return true;
+        } else {
+            for (Tree<T> subtree : subtrees) {
+                boolean deleted = subtree.deleteItem(value);
+                if (deleted) {
+                    if (subtree.isEmpty()) {
+                        subtrees.remove(subtree);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    public void insert(T value) {
+        if (isEmpty()) {
+            root = value;
+        } else if (subtrees.isEmpty()) {
+            subtrees.add(new Tree<T>(value));
+        } else {
+            Random rng = new Random();
+            if (rng.nextInt(3) == 2) {
+                subtrees.add(new Tree<T>(value));
+            } else {
+                int subtreeIndex = rng.nextInt(subtrees.size());
+                subtrees.get(subtreeIndex).insert(value);
+            }
+        }
+    }
 }
